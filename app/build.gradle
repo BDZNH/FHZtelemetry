@@ -3,17 +3,30 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('C:\\Users\\BDZNH\\Desktop\\keystore\\bdznh_key.jks')
+            storePassword 'hushuangpu2015'
+            keyAlias 'bdznh_key'
+            keyPassword 'hushuangpu2015'
+        }
+    }
     namespace 'com.bdznh.fhztelemetry'
-    compileSdk 32
-
+    compileSdk 34
     defaultConfig {
         applicationId "com.bdznh.fhztelemetry"
         minSdk 26
-        targetSdk 32
-        versionCode 1
+        targetSdk 34
+        versionCode 4
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+            }
+        }
+        signingConfig signingConfigs.debug
     }
 
     buildTypes {
@@ -34,6 +47,9 @@ android {
     }
     buildFeatures {
         viewBinding = true
+    }
+    lint {
+        baseline = file("lint-baseline.xml")
     }
 }
 

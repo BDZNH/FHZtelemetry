@@ -32,11 +32,11 @@
     <string name="car_category_20">Classic Racers</string>
     <string name="car_category_21">Cult Cars</string>
     <string name="car_category_22">Rare Classics</string>
-    <string name="car_category_23">High performance hatchback</string>
-    <string name="car_category_24">Retro high-performance hatchback</string>
+    <string name="car_category_23">高性能掀背车</string>
+    <string name="car_category_24">复古高性能掀背车</string>
     <string name="car_category_25">Super Hot Hatch</string>
-    <string name="car_category_26">Extreme track toys</string>
-    <string name="car_category_28">Classic muscle</string>
+    <string name="car_category_26">极限赛道玩具</string>
+    <string name="car_category_28">经典肌肉车</string>
     <string name="car_category_29">Rods and Customs</string>
     <string name="car_category_30">Retro Muscle</string>
     <string name="car_category_31">Modern Muscle</string>
@@ -59,6 +59,6 @@
     <string name="car_category_48">皮卡车和四轮驱动车</string>
     <string name="car_category_49">UTV</string>
 
-    <string name="power_suffix">%1$dKw</string>
+    <string name="power_suffix">%1$.1fKW</string>
     <string name="torque_suffix">%1$dN·m</string>
 </resources>

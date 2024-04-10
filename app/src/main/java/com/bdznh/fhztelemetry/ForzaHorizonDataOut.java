@@ -47,6 +47,7 @@ public class ForzaHorizonDataOut {
     public ForzaHorizonDataOut(OnDataOutCallback callback){
         cb=callback;
         mForzaData = new ForzaHorizonData();
+        cb.onDataOut(mForzaData);
     }
 
     public interface OnDataOutCallback{

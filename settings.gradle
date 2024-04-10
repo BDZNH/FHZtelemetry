@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "fhztelemetry"
+rootProject.name = "My Application"
 include ':app'

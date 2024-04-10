@@ -56,6 +56,6 @@
     <string name="car_category_48">皮卡车和四轮驱动车</string>
     <string name="car_category_49">UTV</string>
 
-    <string name="power_suffix">%1$dKw</string>
+    <string name="power_suffix">%1$.1fKW</string>
     <string name="torque_suffix">%1$dN·m</string>
 </resources>

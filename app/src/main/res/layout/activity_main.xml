@@ -19,7 +19,7 @@
         app:speed_text_size="70sp"
         app:gears_circle_radius="20dp"
         app:gears_circle_stroke_size="3dp"
-        app:gears_text_size="30sp"
+        app:gears_text_size="40sp"
         app:steer_external_circle_radius="93dp"
         app:steer_internal_circle_raidus="25dp"
         app:steer_link_line_size="3dp"/>
@@ -132,7 +132,7 @@
                 android:id="@+id/car_clutch"
                 android:textColor="@color/white"
                 android:layout_margin="@dimen/text_margin"
-                android:text="OFF"/>
+                android:text="0%"/>
         </TableRow>
         <TableRow>
             <TextView
@@ -143,7 +143,29 @@
                 android:id="@+id/car_handbrake"
                 android:textColor="@color/white"
                 android:layout_margin="@dimen/text_margin"
-                android:text="OFF"/>
+                android:text="0%"/>
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:text="@string/brake"
+                android:textColor="@color/white"
+                android:layout_margin="@dimen/text_margin"/>
+            <TextView
+                android:id="@+id/car_brake"
+                android:textColor="@color/white"
+                android:layout_margin="@dimen/text_margin"
+                android:text="0%"/>
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:text="@string/accel"
+                android:textColor="@color/white"
+                android:layout_margin="@dimen/text_margin"/>
+            <TextView
+                android:id="@+id/car_accel"
+                android:textColor="@color/white"
+                android:layout_margin="@dimen/text_margin"
+                android:text="0%"/>
         </TableRow>
     </TableLayout>
     <View

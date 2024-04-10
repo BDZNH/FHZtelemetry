@@ -30,7 +30,7 @@ public class ForzaHorizonDashboard extends View {
 
     int mSpeed = 0;
     Rect mRectFSpeed;
-    float mSpeedTextSize = sp2px(80);
+    float mSpeedTextSize = sp2px(120);
     int mSpeedTextColor = Color.WHITE;
     LocalPorint mSpeedTextPoint = new LocalPorint();
     LocalPorint mSpeedPoint = new LocalPorint();
@@ -68,7 +68,7 @@ public class ForzaHorizonDashboard extends View {
 
     //挡位
     int mGears = 0;
-    float mGearsTextSize = 60f;
+    float mGearsTextSize = sp2px(60);
     int mGearsIdleTextColor = Color.WHITE;
     int mGearsSteerTextColor = 0xFF18ee88;
     int mGearsMaxTextColor = 0xFFea1f54;
@@ -112,6 +112,7 @@ public class ForzaHorizonDashboard extends View {
     LocalPorint mSteerLine3StartPoint = new LocalPorint();
     LocalPorint mSteerLine3StopPoint = new LocalPorint();
 
+    Typeface mFontTypeFace;
     public ForzaHorizonDashboard(Context context) {
         super(context,null);
     }
@@ -127,6 +128,7 @@ public class ForzaHorizonDashboard extends View {
     public ForzaHorizonDashboard(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes){
         super(context,attrs,defStyleAttr,defStyleRes);
         mContext = context;
+        mFontTypeFace = Typeface.createFromAsset(mContext.getAssets(),"fonts/DS-DIGI.TTF");
         mPaint = new Paint();
         mGearsTextPaint = new Paint();
         mRectFSpeed = new Rect();
@@ -271,7 +273,7 @@ public class ForzaHorizonDashboard extends View {
                     yOffset = mRectEngineMark.height()*1.2f;
                 }else if(angle <= -45){
                     yOffset = mRectEngineMark.height();
-                    xOffset = 0- mRectEngineMark.width();
+                    xOffset = -mRectEngineMark.width();
                 }else if(angle <= 0){
                     mPaint.setTextAlign(Paint.Align.RIGHT);
                     yOffset = 0+mRectEngineMark.height()/2f;
@@ -288,13 +290,13 @@ public class ForzaHorizonDashboard extends View {
         mSpeed = Math.min(mSpeed, 999);
         mSpeed = Math.max(mSpeed, 0);
 
-        mPaint.setTypeface(Typeface.MONOSPACE);
+        mPaint.setTypeface(mFontTypeFace);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setTextSize(mSpeedTextSize);
         mPaint.setTextAlign(Paint.Align.CENTER);
         mPaint.setColor(mSpeedTextColor);
         if(mSpeedTextPoint.X == 0f || mSpeedTextPoint.Y == 0f || onMeasured){
-            String speed = String.format(Locale.CHINA,"%d",0);
+            String speed = "8";
             mPaint.getTextBounds(speed, 0, speed.length(), mRectFSpeed);
             mSpeedPoint.X=mCenter.X+mRadius;
             mSpeedPoint.Y=mCenter.Y;
@@ -302,35 +304,54 @@ public class ForzaHorizonDashboard extends View {
             mSpeedTextPoint.X = mCenter.X;
             mSpeedTextPoint.Y = mRectFSpeed.height()+mSpeedPoint.Y;
         }
-        int hundredSpeed = mSpeed/100;
+        float fontspace = 25;
+        //画3个0衬底
+        mPaint.setColor(0x20FFFFFF);
+        canvas.drawText("8", mSpeedTextPoint.X-mRectFSpeed.width()-fontspace,mSpeedTextPoint.Y ,mPaint);
+        canvas.drawText("8", mSpeedTextPoint.X,mSpeedTextPoint.Y ,mPaint);
+        canvas.drawText("8", mSpeedTextPoint.X+mRectFSpeed.width()+fontspace,mSpeedTextPoint.Y ,mPaint);
+        mPaint.setColor(0xFFFFFFFF);
+        //百位速度
+        int hundredSpeed = (mSpeed/100)%10;
+        //十位速度
         int decileSpeed = (mSpeed/10)%10;
+        //个位速度
         int digitsSpeed = mSpeed%10;
         int drawspeed = 0;
-        float fontspace = 15;
-        if(hundredSpeed==0){
-            mPaint.setColor(0x80FFFFFF);
-        }else{
-            mPaint.setColor(0xFFFFFFFF);
+        if(hundredSpeed > 0){
+            drawspeed = hundredSpeed;
+            if(drawspeed == 1){
+                canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
+                        mSpeedTextPoint.X-mRectFSpeed.width()*0.56f-fontspace,mSpeedTextPoint.Y ,mPaint);
+            } else {
+                canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
+                        mSpeedTextPoint.X-mRectFSpeed.width()-fontspace,mSpeedTextPoint.Y ,mPaint);
+            }
         }
-        drawspeed = hundredSpeed;
-        canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
-                mSpeedTextPoint.X-mRectFSpeed.width()-fontspace,mSpeedTextPoint.Y ,mPaint);
-        if(hundredSpeed==0 && decileSpeed==0){
-            mPaint.setColor(0x80FFFFFF);
-        }else{
-            mPaint.setColor(0xFFFFFFFF);
+        if(decileSpeed > 0) {
+            drawspeed=decileSpeed;
+            if(drawspeed == 1){
+                canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
+                        mSpeedTextPoint.X+mRectFSpeed.width()*0.44f,mSpeedTextPoint.Y ,mPaint);
+            } else {
+                canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
+                        mSpeedTextPoint.X,mSpeedTextPoint.Y ,mPaint);
+            }
+        }else if(hundredSpeed != 0){
+            canvas.drawText("0",mSpeedTextPoint.X,mSpeedTextPoint.Y ,mPaint);
         }
-        drawspeed=decileSpeed;
-        canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
-                mSpeedTextPoint.X,mSpeedTextPoint.Y ,mPaint);
-        if(hundredSpeed==0 && decileSpeed==0 && digitsSpeed == 0){
-            mPaint.setColor(0x80FFFFFF);
-        }else{
-            mPaint.setColor(0xFFFFFFFF);
+        if(digitsSpeed > 0){
+            drawspeed=digitsSpeed;
+            if(drawspeed == 1){
+                canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
+                        mSpeedTextPoint.X+mRectFSpeed.width()*1.44f+fontspace,mSpeedTextPoint.Y ,mPaint);
+            }else{
+                canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
+                        mSpeedTextPoint.X+mRectFSpeed.width()+fontspace,mSpeedTextPoint.Y ,mPaint);
+            }
+        }else if(hundredSpeed != 0 || decileSpeed != 0){
+            canvas.drawText("0",mSpeedTextPoint.X+mRectFSpeed.width()+fontspace,mSpeedTextPoint.Y ,mPaint);
         }
-        drawspeed=digitsSpeed;
-        canvas.drawText(String.format(Locale.CHINA,"%d",drawspeed),
-                mSpeedTextPoint.X+mRectFSpeed.width()+fontspace,mSpeedTextPoint.Y ,mPaint);
 
         //画挡位
         mPaint.setStyle(Paint.Style.STROKE);
@@ -359,6 +380,7 @@ public class ForzaHorizonDashboard extends View {
         }
         canvas.drawText(mGearsTextString,mGearsPoint.X ,mGearsPoint.Y,mPaint);
 
+        mPaint.setTypeface(Typeface.MONOSPACE);
         //画指针
         float rotateAngle = mStartAngle+(mEngineCurrentRPM*1f / mEngineMaxRPM)*mSwipAngle;
         mPaint.setStyle(Paint.Style.FILL);
@@ -458,7 +480,7 @@ public class ForzaHorizonDashboard extends View {
         onMeasured  = false;
     }
 
-    public void drawArc(Canvas canvas,Paint paint,final LocalPorint center,float radius,float startAngle,float stopAngle){
+    private void drawArc(Canvas canvas,Paint paint,final LocalPorint center,float radius,float startAngle,float stopAngle){
         canvas.drawArc(center.X-radius,center.Y-radius,
                 center.X+radius,center.Y+radius,
                 stopAngle,startAngle-stopAngle,

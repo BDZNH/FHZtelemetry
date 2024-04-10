@@ -2,6 +2,7 @@ package com.bdznh.fhztelemetry;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import android.annotation.SuppressLint;
@@ -26,6 +27,10 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements ForzaHorizonDataOut.OnDataOutCallback {
     static String TAG = "ForzaHorizon";
+
+    private final static int MSG_REFRESH_UI = 1;
+    private final static int MSG_PAUSE_RECV = 2;
+    private final static int MSG_START_RECV = 3;
     ForzaHorizonDataOut forza =null;
     ActivityMainBinding mBinding;
 
@@ -36,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
     int mDriveTrainType;
     int mClutch;
     int mHandBrake;
+
+    int mAccel;
+    int mBrake;
     float mPower;
     float mTorque;
 
@@ -59,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
         isVisiable = false;
         mLocalHandler = new LocalHandler(this);
         forza = new ForzaHorizonDataOut(this);
-        mBinding.forzaDashboard.update(123f,9999,2300,888,3,180,120,-100);
+        mBinding.forzaDashboard.update(100f,9999,2300,888,3,180,120,-100);
     }
 
     void initViewState(){
@@ -138,99 +146,125 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
     }
 
     @Override
-    public synchronized void onDataOut(ForzaHorizonData data) {
+    public void onDataOut(ForzaHorizonData data) {
+        if(mForzaData == null){
             mForzaData = data;
-    }
-
-    @Override
-    public synchronized void onStartForzaDataOut(){
-        onListen  = true;
-        mLocalHandler.sendEmptyMessage(1);
-        mLocalHandler.sendEmptyMessage(0);
-    }
-
-    @Override
-    public synchronized void onPauseForzaDataOut(){
-        onListen  = false;
-        mLocalHandler.removeMessages(0);
-        mLocalHandler.sendEmptyMessage(1);
-    }
-
-    public void onStateChange(){
-        if(onListen){
-            mBinding.viewCover.setBackgroundColor(0x00000000);
-        }else{
-            mBinding.viewCover.setBackgroundColor(getResources().getColor(R.color.half_color_dart));
         }
+    }
+
+    @Override
+    public void onStartForzaDataOut(){
+        onListen  = true;
+        mLocalHandler.sendEmptyMessage(MSG_START_RECV);
+        mLocalHandler.sendEmptyMessage(MSG_REFRESH_UI);
+    }
+
+    @Override
+    public void onPauseForzaDataOut(){
+        onListen  = false;
+        mLocalHandler.removeMessages(MSG_REFRESH_UI);
+        mLocalHandler.sendEmptyMessage(MSG_PAUSE_RECV);
     }
 
     @SuppressLint("DefaultLocale")
     public void  refreshUI(){
-        synchronized (mForzaData){
-            if(mBinding.carInfo.getVisibility() == View.VISIBLE){
-                if(mCarClass != mForzaData.CarClass){
-                    mCarClass = mForzaData.CarClass;
-                    mBinding.carclass.setText(mapIntToCarClass(mCarClass));
+        if(mForzaData == null){
+            return;
+        }
+        if(mBinding.carInfo.getVisibility() == View.VISIBLE){
+            if(mCarClass != mForzaData.CarClass){
+                mCarClass = mForzaData.CarClass;
+                mBinding.carclass.setText(mapIntToCarClass(mCarClass));
+            }
+            if(mCarID != mForzaData.CarId){
+                mCarID = mForzaData.CarId;
+                mBinding.carid.setText(String.valueOf(mCarID));
+            }
+            if(mCarPereformanceIndex != mForzaData.CarPerformanceIndex){
+                mCarPereformanceIndex = mForzaData.CarPerformanceIndex;
+                mBinding.carPerform.setText(String.valueOf(mCarPereformanceIndex));
+            }
+            if(mCategory != mForzaData.CarCategory){
+                mCategory = mForzaData.CarCategory;
+                mBinding.carCategory.setText(mapIntToCarCategory(mCategory));
+            }
+            if(mPower != mForzaData.Power){
+                mPower= mForzaData.Power;
+                if(mPower < 0.0) {
+                    mPower = 0.0f;
                 }
-                if(mCarID != mForzaData.CarId){
-                    mCarID = mForzaData.CarId;
-                    mBinding.carid.setText(String.valueOf(mCarID));
-                }
-                if(mCarPereformanceIndex != mForzaData.CarPerformanceIndex){
-                    mCarPereformanceIndex = mForzaData.CarPerformanceIndex;
-                    mBinding.carPerform.setText(String.valueOf(mCarPereformanceIndex));
-                }
-                if(mCategory != mForzaData.CarCategory){
-                    mCategory = mForzaData.CarCategory;
-                    mBinding.carCategory.setText(mapIntToCarCategory(mCategory));
-                }
-                if(mPower != mForzaData.Power){
-                    mPower= mForzaData.Power;
-                    mBinding.carPower.setText(String.format(Locale.CHINA,
-                            getResources().getString(R.string.power_suffix),(int)(mPower/1000f)));
-                }
-                if(mTorque != mForzaData.Torque){
-                    mTorque = mForzaData.Torque;
-                    mBinding.carTorque.setText(String.format(Locale.CHINA,
-                            getResources().getString(R.string.torque_suffix),(int)mTorque));
-                }
-                if(mDriveTrainType != mForzaData.DrivetrainType){
-                    mDriveTrainType = mForzaData.DrivetrainType;
-                    mBinding.carDriveTrainType.setText(mapIntToDrivingType(mDriveTrainType));
-                }
-                if(mClutch != mForzaData.Clutch){
-                    mClutch = mForzaData.Clutch;
-                    if(mClutch >0){
-                        mBinding.carClutch.setText("ON");
-                        mBinding.carClutch.setTextColor(getResources().getColor(R.color.turn_on));
-                    }else{
-                        mBinding.carClutch.setText("OFF");
-                        mBinding.carClutch.setTextColor(getResources().getColor(R.color.turn_off));
-                    }
-                }
-                if(mHandBrake != mForzaData.HandBrake){
-                    mHandBrake = mForzaData.HandBrake;
-                    if(mHandBrake >0){
-                        mBinding.carHandbrake.setText("ON");
-                        mBinding.carHandbrake.setTextColor(getResources().getColor(R.color.turn_on));
-                    }else{
-                        mBinding.carHandbrake.setText("OFF");
-                        mBinding.carHandbrake.setTextColor(getResources().getColor(R.color.turn_off));
-                    }
+                mBinding.carPower.setText(String.format(Locale.CHINA,
+                        getResources().getString(R.string.power_suffix),(mPower/1000f)));
+            }
+            if(mTorque != mForzaData.Torque){
+                mTorque = mForzaData.Torque;
+                mBinding.carTorque.setText(String.format(Locale.CHINA,
+                        getResources().getString(R.string.torque_suffix),(int)mTorque));
+            }
+            if(mDriveTrainType != mForzaData.DrivetrainType){
+                mDriveTrainType = mForzaData.DrivetrainType;
+                mBinding.carDriveTrainType.setText(mapIntToDrivingType(mDriveTrainType));
+            }
+            if(mClutch != mForzaData.Clutch){
+                mClutch = mForzaData.Clutch;
+                if(mClutch >0){
+                    mBinding.carClutch.setText(String.format(Locale.CHINA,"%.1f%%",mClutch*100f/255));
+                    mBinding.carClutch.setTextColor(ContextCompat.getColor(this,R.color.turn_on));
+                }else{
+                    mBinding.carClutch.setText(String.format(Locale.CHINA,"%.1f%%",mClutch*100f/255));
+                    mBinding.carClutch.setTextColor(ContextCompat.getColor(this,R.color.turn_off));
                 }
             }
+            if(mHandBrake != mForzaData.HandBrake){
+                mHandBrake = mForzaData.HandBrake;
+                if(mHandBrake >0){
+                    mBinding.carHandbrake.setText(String.format(Locale.CHINA,"%.1f%%",mHandBrake*100f/255));
+                    mBinding.carHandbrake.setTextColor(ContextCompat.getColor(this,R.color.turn_on));
+                }else{
+                    mBinding.carHandbrake.setText(String.format(Locale.CHINA,"%.1f%%",mHandBrake*100f/255));
+                    mBinding.carHandbrake.setTextColor(ContextCompat.getColor(this,R.color.turn_off));
+                }
+            }
+            if(mBrake != mForzaData.Brake){
+                mBrake = mForzaData.Brake;
+                if(mBrake >0){
+                    mBinding.carBrake.setText(String.format(Locale.CHINA,"%.1f%%",mBrake*100f/255));
+                    mBinding.carBrake.setTextColor(ContextCompat.getColor(this,R.color.turn_on));
+                }else{
+                    mBinding.carBrake.setText(String.format(Locale.CHINA,"%.1f%%",mBrake*100f/255));
+                    mBinding.carBrake.setTextColor(ContextCompat.getColor(this,R.color.turn_off));
+                }
+            }
+            if(mAccel != mForzaData.Accel){
+                mAccel = mForzaData.Accel;
+                if(mAccel >0){
+                    mBinding.carAccel.setText(String.format(Locale.CHINA,"%.1f%%",mAccel*100f/255));
+                    mBinding.carAccel.setTextColor(ContextCompat.getColor(this,R.color.turn_on));
+                }else{
+                    mBinding.carAccel.setText(String.format(Locale.CHINA,"%.1f%%",mAccel*100f/255));
+                    mBinding.carAccel.setTextColor(ContextCompat.getColor(this,R.color.turn_off));
+                }
+            }
+        }
 
-            mBinding.forzaDashboard.update(mForzaData.Speed*3.6f,
-                    (int)mForzaData.Maxrpm,
-                    (int)mForzaData.Currentrpm,
-                    (int)mForzaData.Idlerpm,
-                    mForzaData.Gears,
-                    mForzaData.Accel,
-                    mForzaData.Brake,
-                    mForzaData.Steer);
-            if(onListen){
-                mLocalHandler.sendEmptyMessageDelayed(0,16);
-            }
+        mBinding.forzaDashboard.update(mForzaData.Speed*3.6f,
+                (int)mForzaData.Maxrpm,
+                (int)mForzaData.Currentrpm,
+                (int)mForzaData.Idlerpm,
+                mForzaData.Gears,
+                mForzaData.Accel,
+                mForzaData.Brake,
+                mForzaData.Steer);
+        if(onListen){
+            mLocalHandler.sendEmptyMessageDelayed(MSG_REFRESH_UI,16);
+        }
+    }
+
+    private void updateCoverViewStat(){
+        if(onListen){
+            mBinding.viewCover.setBackgroundColor(0x00000000);
+        } else {
+            mBinding.viewCover.setBackgroundColor(ContextCompat.getColor(this,R.color.half_color_dark));
         }
     }
 
@@ -314,10 +348,19 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
         }
         public void handleMessage(Message msg){
             switch (msg.what){
-                case 0:
-                    activity.get().refreshUI();
-                case 1:
-                    activity.get().onStateChange();
+                case MSG_REFRESH_UI:
+                    if(activity.get() != null){
+                        android.os.Trace.beginSection("refreshui");
+                        activity.get().refreshUI();
+                        android.os.Trace.endSection();
+                    }
+                    break;
+                case MSG_START_RECV:
+                case MSG_PAUSE_RECV:
+                    if(activity.get() != null){
+                        activity.get().updateCoverViewStat();
+                    }
+                    break;
             }
         }
     }

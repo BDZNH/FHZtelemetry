@@ -23,6 +23,9 @@
 #include <condition_variable>
 #include <mutex>
 #include "ForzaDataFormat.h"
+#include "Trace.h"
+
+#define USE_TCP_AS_SERVER
 
 static struct {
     jclass clazz;
@@ -59,7 +62,7 @@ void startReceiveForzaData(int port){
         ALOGE("startReceiveForzaData not running");
         return;
     }
-    gSocketFD = socket(AF_INET,SOCK_DGRAM,0);
+    gSocketFD = socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
     if(gSocketFD == -1){
         ALOGE("get socket failed: %s", strerror(errno));
         gSocketFD = 0;
@@ -101,42 +104,49 @@ void startReceiveForzaData(int port){
     int onMenu = 0;
     u8 tmpdata[1024];
     while(gRunning){
-//        memset(&forzadata,0,sizeof(forzadata));
         memset(tmpdata,0,1024);
         addrlen = sizeof(remoteAddr);
-        ssize_t readLen = recvfrom(gSocketFD,tmpdata,1024,0,(sockaddr*)&remoteAddr,&addrlen);
+        ssize_t readLen = 0;
+        {
+            ScopedTrace recvTrace("recvfrom");
+            readLen = recvfrom(gSocketFD,tmpdata,1024,0,(sockaddr*)&remoteAddr,&addrlen);
+        }
         if(readLen > 0){
             if(readLen == sizeForza){
                 memcpy(&forzadata,tmpdata,sizeForza);
                 if(onMenu != forzadata.IsRaceOn){
                     onMenu = forzadata.IsRaceOn;
                     if(onMenu == 1){
+                        ScopedTrace recvTrace("onStartForzaHorizonData");
                         env->CallVoidMethod(gServiceObj,gServiceClassInfo.onStartForzaHorizonData);
                     }else{
+                        ScopedTrace recvTrace("onPauseForzaHorizonData");
                         env->CallVoidMethod(gServiceObj,gServiceClassInfo.onPauseForzaHorizonData);
                     }
                 }
                 if(!gPause && forzadata.IsRaceOn == 1){
+                    ScopedTrace recvTrace("onReadForzaHorizonData");
                     env->CallVoidMethod(gServiceObj,gServiceClassInfo.onReadForzaHorizonData,
                                         forzadata.CarOrdinal,forzadata.CarClass,forzadata.CarPerformanceIndex,forzadata.CarCategory,
                                         s32(forzadata.Steer),s32(forzadata.Accel&0xFF),s32(forzadata.Brake&0xFF),forzadata.Gear,forzadata.DrivetrainType,
-                                        s32(forzadata.Clutch&0xFF),s32(forzadata.HandBrake&0xFF),s32(forzadata.NormalizedDrivingLine&0xFF),s32(forzadata.NormalizedAIBrakeDifference&0xFF),
+                                        s32(forzadata.Clutch&0x0FF),s32(forzadata.HandBrake&0xFF),s32(forzadata.NormalizedDrivingLine&0xFF),s32(forzadata.NormalizedAIBrakeDifference&0xFF),
                                         forzadata.Speed,forzadata.EngineIdleRpm,forzadata.EngineMaxRpm,forzadata.CurrentEngineRpm,
                                         forzadata.Power,forzadata.Torque);
                 }
             }else{
-                ALOGW("respect %d but received %ld",sizeForza,(long)readLen);
+                ALOGW("respect %d but received %ld",sizeForza,readLen);
             }
         }else{
             ALOGE("received failed %s", strerror(errno));
             break;
         }
     }
-    shutdown(gSocketFD,SHUT_RDWR);
-    close(gSocketFD);
-    gSocketFD = 0;
-    gRunning = false;
-    gSocketFD = 0;
+    if(gSocketFD != 0){
+        shutdown(gSocketFD,SHUT_RDWR);
+        close(gSocketFD);
+        gSocketFD = 0;
+        gRunning = false;
+    }
     ALOGD("startReceiveForzaData end");
 }
 
