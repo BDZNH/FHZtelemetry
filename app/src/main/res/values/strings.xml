@@ -1,0 +1,64 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">FHZTelemetry</string>
+    <string name="carclass">Car Class</string>
+    <string name="carid">Car ID</string>
+    <string name="carperform">Car Perform</string>
+    <string name="accel">Accels</string>
+    <string name="brake">Brake</string>
+    <string name="speed">Speed</string>
+    <string name="steer">Steer</string>
+    <string name="power">Power</string>
+    <string name="torque">Torque</string>
+    <string name="car_category">Category</string>
+    <string name="car_clutch">Clutch</string>
+    <string name="car_handbrake">Handbrake</string>
+    <string name="car_drivingline">DrivingLine</string>
+    <string name="car_aibrakedifference">AIBrakeDifference</string>
+
+    <string name="drive_train_type">DrivetrainType</string>
+
+    <string name="drive_train_type_0">FWD</string>
+    <string name="drive_train_type_1">RWD</string>
+    <string name="drive_train_type_2">AWD</string>
+
+    <string name="car_category_11">Modern Super Cars</string>
+    <string name="car_category_12">Retro Super Cars</string>
+    <string name="car_category_13">Hyper Cars</string>
+    <string name="car_category_14">Retro Saloons</string>
+    <string name="car_category_16">Vans and Utility</string>
+    <string name="car_category_17">Retro Sports Cars</string>
+    <string name="car_category_18">Modern Sports Cars</string>
+    <string name="car_category_19">Super Saloons</string>
+    <string name="car_category_20">Classic Racers</string>
+    <string name="car_category_21">Cult Cars</string>
+    <string name="car_category_22">Rare Classics</string>
+    <string name="car_category_23">高性能掀背车</string>
+    <string name="car_category_24">复古高性能掀背车</string>
+    <string name="car_category_25">Super Hot Hatch</string>
+    <string name="car_category_26">极限赛道玩具</string>
+    <string name="car_category_28">经典肌肉车</string>
+    <string name="car_category_29">Rods and Customs</string>
+    <string name="car_category_30">Retro Muscle</string>
+    <string name="car_category_31">Modern Muscle</string>
+    <string name="car_category_32">Retro Rally</string>
+    <string name="car_category_33">Classic Rally</string>
+    <string name="car_category_34">Rally Monster</string>
+    <string name="car_category_35">Modern Rally</string>
+    <string name="car_category_36">GT Cars</string>
+    <string name="car_category_37">Super GT</string>
+    <string name="car_category_38">Extreme Offroad</string>
+    <string name="car_category_39">Sports Utility Heroes</string>
+    <string name="car_category_40">Offroad</string>
+    <string name="car_category_41">Offroad Buggies</string>
+    <string name="car_category_42">Classic Sports Cars</string>
+    <string name="car_category_43">Track Toys</string>
+    <string name="car_category_44">Vintage Racers</string>
+    <string name="car_category_45">Trucks</string>
+    <string name="car_category_46">沙滩车</string>
+    <string name="car_category_47">漂移车</string>
+    <string name="car_category_48">皮卡车和四轮驱动车</string>
+    <string name="car_category_49">UTV</string>
+
+    <string name="power_suffix">%1$.1fKW</string>
+    <string name="torque_suffix">%1$dN·m</string>
+</resources>

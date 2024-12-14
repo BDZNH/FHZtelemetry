@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ForzaHorizonDashboard">
+<!--        空闲时的挡位字体颜色-->
+        <attr name="idle_gears_text_color" format="color"/>
+<!--        驾驶中的挡位字体颜色-->
+        <attr name="steer_gears_text_color" format="color"/>
+<!--        引擎到最大转速时的字体颜色-->
+        <attr name="max_gears_text_color" format="color"/>
+<!--        挡位字体大小-->
+        <attr name="gears_text_size" format="dimension"/>
+<!--        挡位的圆圈半径-->
+        <attr name="gears_circle_radius" format="dimension"/>
+<!--            挡位的圆圈宽度-->
+        <attr name="gears_circle_stroke_size" format="dimension"/>
+
+<!--        速度字体大小-->
+        <attr name="speed_text_size" format="dimension"/>
+<!--        速度字体颜色-->
+        <attr name="speed_text_color" format="color"/>
+
+<!--        引擎圆弧宽度-->
+        <attr name="engine_arc_size" format="dimension"/>
+<!--        引擎圆弧颜色-->
+        <attr name="engine_arc_color" format="color"/>
+<!--        引擎圆弧半径-->
+        <attr name="engine_arc_radius" format="dimension"/>
+
+<!--        指针宽度-->
+        <attr name="indicator_size" format="dimension"/>
+<!--        指针颜色-->
+        <attr name="indicator_color" format="color"/>
+
+<!--        油门宽度-->
+        <attr name="accels_size" format="dimension"/>
+<!--        油门颜色-->
+        <attr name="accels_color" format="color"/>
+<!--        油门半径-->
+        <attr name="accels_radius" format="dimension"/>
+
+<!--        刹车宽度-->
+        <attr name="brake_size" format="dimension"/>
+<!--        刹车颜色-->
+        <attr name="brake_color" format="color"/>
+<!--        刹车半径-->
+        <attr name="brake_radius" format="dimension"/>
+
+        <attr name="steer_external_circle_radius" format="dimension"/>
+        <attr name="steer_external_stroke_size" format="dimension"/>
+        <attr name="steer_internal_circle_raidus" format="dimension"/>
+        <attr name="steer_internal_stroke_size" format="dimension"/>
+        <attr name="steer_link_line_size" format="dimension"/>
+        <attr name="steer_color" format="color"/>
+
+    </declare-styleable>
+</resources>
