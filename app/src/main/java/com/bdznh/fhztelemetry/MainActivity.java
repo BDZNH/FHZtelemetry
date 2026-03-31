@@ -3,30 +3,25 @@ package com.bdznh.fhztelemetry;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import android.annotation.SuppressLint;
-import android.app.Instrumentation;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.bdznh.fhztelemetry.databinding.ActivityMainBinding;
 
-import java.io.IOException;
-import java.io.OutputStream;
+
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements ForzaHorizonDataOut.OnDataOutCallback {
-    static String TAG = "ForzaHorizon";
+    static final String TAG = "ForzaHorizon";
 
     private final static int MSG_REFRESH_UI = 1;
     private final static int MSG_PAUSE_RECV = 2;
@@ -65,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
         initViewState();
         setSystemUIVisibility(false);
         isVisiable = false;
-        mLocalHandler = new LocalHandler(this);
+        mLocalHandler = new LocalHandler(getMainLooper(),this);
         forza = new ForzaHorizonDataOut(this);
         mBinding.forzaDashboard.update(100f,9999,2300,888,3,180,120,-100);
     }
@@ -114,12 +109,16 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
 
     private void setSystemUIVisibility(boolean visiable){
         if(visiable){
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            }
             if(mBinding.carInfo.getVisibility() != View.VISIBLE){
                 mBinding.carInfo.setVisibility(View.VISIBLE);
             }
         }else{
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            }
         }
     }
 
@@ -343,7 +342,8 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
 
     private static class LocalHandler extends Handler{
         WeakReference<MainActivity> activity;
-        public LocalHandler(MainActivity activity){
+        public LocalHandler(Looper looper,MainActivity activity){
+            super(looper);
             this.activity = new WeakReference<>(activity);
         }
         public void handleMessage(Message msg){
