@@ -13,11 +13,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags ''
-            }
-        }
         signingConfig signingConfigs.debug
     }
 
@@ -31,12 +26,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    externalNativeBuild {
-        cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.31.1'
-        }
-    }
     buildFeatures {
         viewBinding = true
     }
@@ -44,7 +33,6 @@ android {
         baseline = file("lint-baseline.xml")
     }
     buildToolsVersion '35.0.0'
-    ndkVersion '27.0.12077973'
     buildFeatures.buildConfig = true
 }
 

@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
     private final static int MSG_REFRESH_UI = 1;
     private final static int MSG_PAUSE_RECV = 2;
     private final static int MSG_START_RECV = 3;
+    private final static int MSG_AUTO_FULLSCREEN = 4;
+    private final static long AUTO_FULLSCREEN_DELAY_MS = 10_000L;
     ForzaHorizonDataOut forza =null;
     ActivityMainBinding mBinding;
 
@@ -104,6 +106,14 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
         mBinding.forzaDashboard.setOnClickListener((v)->{
             isVisiable = !isVisiable;
             setSystemUIVisibility(isVisiable);
+            if (!isVisiable) {
+                // Exited fullscreen — schedule auto re-entry in 10s
+                mLocalHandler.removeMessages(MSG_AUTO_FULLSCREEN);
+                mLocalHandler.sendEmptyMessageDelayed(MSG_AUTO_FULLSCREEN, AUTO_FULLSCREEN_DELAY_MS);
+            } else {
+                // Entered fullscreen — cancel any pending auto re-entry
+                mLocalHandler.removeMessages(MSG_AUTO_FULLSCREEN);
+            }
         });
     }
 
@@ -359,6 +369,14 @@ public class MainActivity extends AppCompatActivity implements ForzaHorizonDataO
                 case MSG_PAUSE_RECV:
                     if(activity.get() != null){
                         activity.get().updateCoverViewStat();
+                    }
+                    break;
+                case MSG_AUTO_FULLSCREEN:
+                    if(activity.get() != null){
+                        if (!activity.get().isVisiable) {
+                            activity.get().isVisiable = true;
+                            activity.get().setSystemUIVisibility(true);
+                        }
                     }
                     break;
             }
