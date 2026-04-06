@@ -36,14 +36,6 @@ android {
     buildFeatures.buildConfig = true
 }
 
-allprojects {
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-        }
-    }
-}
-
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.4.1'

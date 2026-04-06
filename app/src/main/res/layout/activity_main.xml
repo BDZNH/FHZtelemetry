@@ -9,7 +9,7 @@
 
 
 
-    <com.bdznh.fhztelemetry.ForzaHorizonDashboard
+    <com.bdznh.fhztelemetry.ui.widget.ForzaHorizonDashboard
         android:id="@+id/forza_dashboard"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

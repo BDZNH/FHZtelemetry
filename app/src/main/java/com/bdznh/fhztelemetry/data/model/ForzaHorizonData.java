@@ -1,4 +1,4 @@
-package com.bdznh.fhztelemetry;
+package com.bdznh.fhztelemetry.data.model;
 
 public class ForzaHorizonData {
     public int CarId;
@@ -10,9 +10,9 @@ public class ForzaHorizonData {
     public int Brake;
     public int Gears;
     public int DrivetrainType;
-    public int Clutch;//离合
-    public int HandBrake;//手刹
-    public int DrivingLine;//引导线
+    public int Clutch;
+    public int HandBrake;
+    public int DrivingLine;
     public int ABS;
     public float Speed;
     public float Idlerpm;
