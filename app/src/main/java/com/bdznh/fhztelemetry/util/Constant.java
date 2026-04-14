@@ -7,6 +7,13 @@ public class Constant {
 
     public static final int DEFAULT_PORT = 9998;
 
+    // SharedPreferences
+    public static final String PREFS_NAME = "fhztelemetry_prefs";
+    public static final String PREF_UDP_PORT = "udp_port";
+
+    // Intent extra for auto-start UDP listening
+    public static final String EXTRA_AUTO_START = "auto_start";
+
     // Handler message types
     public static final int MSG_REFRESH_UI = 1;
     public static final int MSG_PAUSE_RECV = 2;

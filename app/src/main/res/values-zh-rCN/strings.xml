@@ -58,4 +58,12 @@
 
     <string name="power_suffix">%1$.1fKW</string>
     <string name="torque_suffix">%1$dN·m</string>
+
+    <string name="settings">设置</string>
+    <string name="udp_port">UDP 端口</string>
+    <string name="port_invalid">请输入有效的端口号 (1024-65535)</string>
+    <string name="port_out_of_range">端口必须在 1024 到 65535 之间</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+    <string name="udp_port_settings_title">UDP 监听端口</string>
 </resources>

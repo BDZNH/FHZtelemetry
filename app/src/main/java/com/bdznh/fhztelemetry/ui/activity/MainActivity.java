@@ -1,18 +1,25 @@
 package com.bdznh.fhztelemetry.ui.activity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.bdznh.fhztelemetry.R;
 import com.bdznh.fhztelemetry.callback.TelemetryCallback;
@@ -46,6 +53,9 @@ public class MainActivity extends AppCompatActivity implements TelemetryCallback
 
     ForzaHorizonData mForzaData;
     boolean onListen = false;
+    int mCurrentPort = Constant.DEFAULT_PORT;
+
+    private SharedPreferences mPrefs;
 
     LocalHandler mLocalHandler;
 
@@ -59,12 +69,60 @@ public class MainActivity extends AppCompatActivity implements TelemetryCallback
         super.onCreate(savedInstanceState);
         mBinding = ActivityMainBinding.inflate(LayoutInflater.from(this));
         setContentView(mBinding.getRoot());
+
+        // Load saved port
+        mPrefs = getSharedPreferences(Constant.PREFS_NAME, Context.MODE_PRIVATE);
+        mCurrentPort = mPrefs.getInt(Constant.PREF_UDP_PORT, Constant.DEFAULT_PORT);
+
         initViewState();
         setSystemUIVisibility(false);
         isVisible = false;
         mLocalHandler = new LocalHandler(getMainLooper(), this);
         forza = new TelemetryUdpReceiver(this);
         mBinding.forzaDashboard.update(100f, 9999, 2300, 888, 3, 180, 120, -100);
+
+        // Check for auto-start parameter or action
+        boolean shouldAutoStart = false;
+        if (getIntent().hasExtra(Constant.EXTRA_AUTO_START)) {
+            int autoStart = getIntent().getIntExtra(Constant.EXTRA_AUTO_START, 0);
+            shouldAutoStart = (autoStart == 1);
+        } else if (getIntent().getAction() != null
+                && getIntent().getAction().equals("com.bdznh.fhztelemetry.ACTION_AUTO_START")) {
+            shouldAutoStart = true;
+        }
+
+        if (shouldAutoStart && !isStarted) {
+            long ret = forza.start(mCurrentPort);
+            if (ret == 0) {
+                isStarted = true;
+                mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause_green));
+                mBinding.stop.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop_white));
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        // Check for auto-start parameter
+        boolean shouldAutoStart = false;
+        if (intent.hasExtra(Constant.EXTRA_AUTO_START)) {
+            int autoStart = intent.getIntExtra(Constant.EXTRA_AUTO_START, 0);
+            shouldAutoStart = (autoStart == 1);
+        } else if (intent.getAction() != null
+                && intent.getAction().equals("com.bdznh.fhztelemetry.ACTION_AUTO_START")) {
+            shouldAutoStart = true;
+        }
+
+        if (shouldAutoStart && !isStarted) {
+            long ret = forza.start(mCurrentPort);
+            if (ret == 0) {
+                isStarted = true;
+                mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause_green));
+                mBinding.stop.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop_white));
+            }
+        }
     }
 
     void initViewState() {
@@ -78,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements TelemetryCallback
                     mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause_green));
                 }
             } else {
-                long ret = forza.start(Constant.DEFAULT_PORT);
+                long ret = forza.start(mCurrentPort);
                 if (ret == 0) {
                     isStarted = true;
                     mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause_green));
@@ -96,7 +154,9 @@ public class MainActivity extends AppCompatActivity implements TelemetryCallback
                 }
             }
         });
+        mBinding.settings.setOnClickListener(v -> showPortSettingsDialog());
         mBinding.stop.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop_gray));
+        mBinding.settings.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_settings));
         mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.start_white));
         mBinding.carInfo.setOnClickListener(v -> {
             if (mBinding.carInfo.getVisibility() == View.VISIBLE) {
@@ -113,6 +173,69 @@ public class MainActivity extends AppCompatActivity implements TelemetryCallback
                 mLocalHandler.removeMessages(Constant.MSG_AUTO_FULLSCREEN);
             }
         });
+    }
+
+    private void showPortSettingsDialog() {
+        @SuppressLint("InflateParams")
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_port_settings, null);
+        EditText portInput = dialogView.findViewById(R.id.port_input);
+        portInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        portInput.setText(String.valueOf(mCurrentPort));
+        portInput.selectAll();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.udp_port_settings_title);
+        builder.setView(dialogView);
+        builder.setPositiveButton(R.string.confirm, null);
+        builder.setNegativeButton(R.string.cancel, null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String portStr = portInput.getText().toString().trim();
+            if (!isValidPort(portStr)) {
+                portInput.setError(getString(R.string.port_invalid));
+                return;
+            }
+            int newPort = Integer.parseInt(portStr);
+            if (newPort < 1024 || newPort > 65535) {
+                portInput.setError(getString(R.string.port_out_of_range));
+                return;
+            }
+            if (newPort != mCurrentPort) {
+                mCurrentPort = newPort;
+                // Save to SharedPreferences
+                mPrefs.edit().putInt(Constant.PREF_UDP_PORT, mCurrentPort).apply();
+                if (isStarted) {
+                    forza.stop();
+                    isStarted = false;
+                    long ret = forza.start(mCurrentPort);
+                    if (ret == 0) {
+                        isStarted = true;
+                        mBinding.stop.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop_white));
+                        mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.pause_green));
+                    } else {
+                        Toast.makeText(this, "Failed to restart with new port", Toast.LENGTH_SHORT).show();
+                        mBinding.stop.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.stop_gray));
+                        mBinding.startpause.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.start_white));
+                    }
+                }
+            }
+            dialog.dismiss();
+        });
+    }
+
+    private boolean isValidPort(String portStr) {
+        if (portStr == null || portStr.isEmpty()) {
+            return false;
+        }
+        try {
+            int port = Integer.parseInt(portStr);
+            return port > 0 && port <= 65535;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private void setSystemUIVisibility(boolean visible) {

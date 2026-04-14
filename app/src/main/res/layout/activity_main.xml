@@ -4,10 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    tools:context=".ui.activity.MainActivity"
     android:background="@color/color_dark">
-
-
 
     <com.bdznh.fhztelemetry.ui.widget.ForzaHorizonDashboard
         android:id="@+id/forza_dashboard"
@@ -45,6 +43,12 @@
                 android:layout_height="40dp"
                 android:layout_margin="@dimen/text_margin"
                 android:text="A"/>
+            <ImageView
+                android:id="@+id/settings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="@dimen/text_margin"
+                android:src="@drawable/ic_settings"/>
         </TableRow>
         <TableRow>
             <TextView
